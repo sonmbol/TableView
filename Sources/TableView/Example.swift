@@ -62,7 +62,7 @@ struct ExampleView: View {
 
     var body: some View {
         VStack {
-            TableView(viewModel: $viewModel.sections)
+            TableView(sections: $viewModel.sections)
                 .id("TableView")
             Button("Add Item") {
                 viewModel.addItem()

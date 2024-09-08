@@ -56,27 +56,20 @@ private extension TableViewCell {
     }
 }
 
-
-// MARK: - View Cell Model Protocol
-public protocol ViewCellModel {
-    var viewType: ViewCellType { get }
-}
-
-// MARK: - View Cell Type Enumeration
+// MARK: - View Cell Type
 public enum ViewCellType {
     case view(any CellView.Type)
     case cell(any TableViewCell.Type)
 }
 
-// MARK: - Static Table View Cell
-final class StaticTableViewCell: UITableViewCell {
-    /// The primary key for the cell.
-    var identifier: Int?
+// MARK: - View Cell Model
+public protocol ViewCellModel {
+    var viewType: ViewCellType { get }
 }
 
 // MARK: - Table View Wrapper
 public struct TableView: UIViewControllerRepresentable {
-    @Binding var viewModel: [[ViewCellModel]]
+    @Binding var sections: [[ViewCellModel]]
     var layout: TableViewLayout = .init()
 
     public func makeUIViewController(context: Context) -> UITableViewController {
@@ -84,22 +77,22 @@ public struct TableView: UIViewControllerRepresentable {
         controller.tableView.dataSource = context.coordinator
         controller.tableView.alwaysBounceVertical = layout.alwaysBounces
         controller.tableView.showsVerticalScrollIndicator = layout.showsIndicators
-        controller.tableView.register(StaticTableViewCell.self, forCellReuseIdentifier: "cell")
+        controller.tableView.register(TableCoordinator.StaticTableViewCell.self, forCellReuseIdentifier: "cell")
         controller.tableView.separatorStyle = layout.separatorStyle
         return controller
     }
 
     public func updateUIViewController(_ uiViewController: UITableViewController, context: Context) {
-        context.coordinator.sections = viewModel
+        context.coordinator.sections = sections
         uiViewController.tableView.reloadData()
     }
 
     public func makeCoordinator() -> TableCoordinator {
-        TableCoordinator(sections: viewModel)
+        TableCoordinator(sections: sections)
     }
 
     // MARK: - Table Coordinator
-    public class TableCoordinator: NSObject, UITableViewDataSource {
+    public final class TableCoordinator: NSObject, UITableViewDataSource {
         var sections: [[ViewCellModel]]
         var registeredCells: [String] = []
 
@@ -149,5 +142,11 @@ public struct TableView: UIViewControllerRepresentable {
                 return cell
             }
         }
+
+        final class StaticTableViewCell: UITableViewCell {
+            /// The primary key for the cell.
+            var identifier: Int?
+        }
     }
+
 }
